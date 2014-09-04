@@ -1,17 +1,18 @@
 #pragma once
 
-#define TRACE(...)  utils::log(utils::LogLevel::LOG_TRACE,   __FILE__, __LINE__, __VA_ARGS__)
-#define DBG(...)    utils::log(utils::LogLevel::LOG_DEBUG,   __FILE__, __LINE__, __VA_ARGS__)
-#define WARN(...)   utils::log(utils::LogLevel::LOG_WARNING, __FILE__, __LINE__, __VA_ARGS__)
-#define ERR(...)    utils::log(utils::LogLevel::LOG_ERROR,   __FILE__, __LINE__, __VA_ARGS__)
+#define TRACE(...)  poison::utils::log(poison::utils::LogLevel::LOG_TRACE,   __FILE__, __LINE__, __VA_ARGS__)
+#define DBG(...)    poison::utils::log(poison::utils::LogLevel::LOG_DEBUG,   __FILE__, __LINE__, __VA_ARGS__)
+#define WARN(...)   poison::utils::log(poison::utils::LogLevel::LOG_WARNING, __FILE__, __LINE__, __VA_ARGS__)
+#define ERR(...)    poison::utils::log(poison::utils::LogLevel::LOG_ERROR,   __FILE__, __LINE__, __VA_ARGS__)
 
 #ifndef POISON_LOG_SYNCHRONIZED
     #define POISON_LOG_SYNCHRONIZED 0
 #endif
 
-
 #include <sstream>
 #include <boost/format.hpp>
+#include <iomanip> // put_time
+#include <chrono>
 
 #if POISON_LOG_SYNCHRONIZED
     #ifdef __ANDROID__
@@ -27,7 +28,6 @@
 #endif
 
 namespace poison { namespace utils {
-    static LogLevel logLevel = LogLevel::LOG_DEBUG;
 
 #if POISON_LOG_SYNCHRONIZED
     #ifdef __ANDROID__
@@ -41,13 +41,27 @@ namespace poison { namespace utils {
     static Mutex logMutex;
 #endif
 
-    class enum LogLevel {
+    enum class LogLevel {
         LOG_NULL = 0, 
         LOG_ERROR, 
         LOG_WARNING, 
         LOG_DEBUG, 
         LOG_TRACE
     };
+    
+    static std::string currentDateTime() {
+        auto now = std::chrono::system_clock::now();
+        auto in_time_t = std::chrono::system_clock::to_time_t(now);
+        struct tm time;
+        localtime_r(&in_time_t, &time);
+        
+        std::stringstream ss;
+        //    ss << std::ctime(&in_time_t);
+        ss << std::put_time(&time, "%Y-%m-%d %X");
+        return ss.str();
+    }
+    
+    static LogLevel logLevel = LogLevel::LOG_DEBUG;
 
     static void setLogLevel(LogLevel l) {
         logLevel = l;
