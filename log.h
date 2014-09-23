@@ -13,6 +13,7 @@
 #include <boost/format.hpp>
 #include <iomanip> // put_time
 #include <chrono>
+#include <string>
 
 #if POISON_LOG_SYNCHRONIZED
     #ifdef __ANDROID__
@@ -49,6 +50,11 @@ namespace poison { namespace utils {
         LOG_TRACE
     };
     
+    namespace internal{
+        static const char * appTag = "app";
+        static LogLevel logLevel = LogLevel::LOG_DEBUG;
+    };
+
     static std::string currentDateTime() {
         auto now = std::chrono::system_clock::now();
         auto in_time_t = std::chrono::system_clock::to_time_t(now);
@@ -60,11 +66,25 @@ namespace poison { namespace utils {
         ss << std::put_time(&time, "%Y-%m-%d %X");
         return ss.str();
     }
-    
-    static LogLevel logLevel = LogLevel::LOG_DEBUG;
 
+    static void setAppTag(const char * t){
+        internal::appTag = t;
+    }
+    
+    static void setAppTag(const std::string& t){
+        internal::appTag = t.c_str();
+    }
+    
     static void setLogLevel(LogLevel l) {
-        logLevel = l;
+        internal::logLevel = l;
+    }
+    
+    static std::string getAppTag(){
+        return std::string(internal::appTag);
+    }
+    
+    static LogLevel getLogLevel(){
+        return internal::logLevel;
     }
 
     static std::string formatString(boost::format& message) {
@@ -89,7 +109,7 @@ namespace poison { namespace utils {
         Lock lock(logMutex);
 #endif
 
-        if (priority > logLevel) {
+        if (priority > internal::logLevel) {
             return;
         }
         
@@ -99,7 +119,11 @@ namespace poison { namespace utils {
         stream  << currentDateTime().c_str() << " [ " << LogLevel_str[int(priority)] << "] " << formatString(format, args...) << std::endl;
         
 #ifdef __APPLE__
-        std::cout << stream.str();
+        if(appTag != ""){
+            std::cout << appTag << ": " << stream.str();
+        }else{
+            std::cout << stream.str();
+        }
 #elif __ANDROID__
 
         android_LogPriority aPriority = android_LogPriority::ANDROID_LOG_UNKNOWN;
@@ -125,7 +149,7 @@ namespace poison { namespace utils {
             break;
         }
 
-        __android_log_write(ANDROID_LOG_INFO, ndk_helper::JNIHelper::GetInstance()->GetAppName(), stream.str() );
+        __android_log_write(ANDROID_LOG_INFO, internal::appTag, stream.str().c_str() );
 
 #endif
         
