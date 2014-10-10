@@ -51,7 +51,7 @@ namespace poison { namespace utils {
     };
     
     namespace internal{
-        static const char * appTag = "app";
+        static std::string appTag = "app";
         static LogLevel logLevel = LogLevel::LOG_DEBUG;
     };
 
@@ -119,8 +119,8 @@ namespace poison { namespace utils {
         stream  << currentDateTime().c_str() << " [ " << LogLevel_str[int(priority)] << "] " << formatString(format, args...) << std::endl;
         
 #ifdef __APPLE__
-        if(appTag != ""){
-            std::cout << appTag << ": " << stream.str();
+        if(internal::appTag != ""){
+            std::cout << internal::appTag << ": " << stream.str();
         }else{
             std::cout << stream.str();
         }
@@ -149,7 +149,7 @@ namespace poison { namespace utils {
             break;
         }
 
-        __android_log_write(ANDROID_LOG_INFO, internal::appTag, stream.str().c_str() );
+        __android_log_write(ANDROID_LOG_INFO, internal::appTag.c_str(), stream.str().c_str() );
 
 #endif
         
