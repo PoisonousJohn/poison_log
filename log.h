@@ -1,8 +1,14 @@
 #pragma once
 
-#define TRACE(...)  poison::utils::log(poison::utils::LogLevel::LOG_TRACE,   __FILE__, __LINE__, __VA_ARGS__)
-#define DBG(...)    poison::utils::log(poison::utils::LogLevel::LOG_DEBUG,   __FILE__, __LINE__, __VA_ARGS__)
-#define WARN(...)   poison::utils::log(poison::utils::LogLevel::LOG_WARNING, __FILE__, __LINE__, __VA_ARGS__)
+#ifndef POISON_RELEASE
+    #define TRACE(...)  poison::utils::log(poison::utils::LogLevel::LOG_TRACE,   __FILE__, __LINE__, __VA_ARGS__)
+    #define DBG(...)    poison::utils::log(poison::utils::LogLevel::LOG_DEBUG,   __FILE__, __LINE__, __VA_ARGS__)
+    #define WARN(...)   poison::utils::log(poison::utils::LogLevel::LOG_WARNING, __FILE__, __LINE__, __VA_ARGS__)
+#else
+    #define TRACE(...)
+    #define DBG(...)
+    #define WARN(...)
+#endif
 #define ERR(...)    poison::utils::log(poison::utils::LogLevel::LOG_ERROR,   __FILE__, __LINE__, __VA_ARGS__)
 
 #ifndef POISON_LOG_SYNCHRONIZED
