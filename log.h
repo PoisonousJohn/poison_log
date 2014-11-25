@@ -155,7 +155,7 @@ namespace poison { namespace utils {
             break;
         }
 
-        __android_log_write(ANDROID_LOG_INFO, internal::appTag.c_str(), stream.str().c_str() );
+        __android_log_write(aPriority, internal::appTag.c_str(), stream.str().c_str() );
 
 #endif
         
