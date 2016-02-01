@@ -17,7 +17,8 @@
 
 #include <sstream>
 #include <boost/format.hpp>
-#include <iomanip> // put_time
+#include <ctime>
+//#include <iomanip> // put_time
 #include <chrono>
 #include <string>
 
@@ -69,7 +70,10 @@ namespace poison { namespace utils {
         
         std::stringstream ss;
         //    ss << std::ctime(&in_time_t);
-        ss << std::put_time(&time, "%Y-%m-%d %X");
+//        ss << std::put_time(&time, "%Y-%m-%d %X");
+        char buffer[256];
+        strftime(buffer, sizeof(buffer), "%Y-%m-%d %X", &time);
+//        ss << std::put_time(&time, "%Y-%m-%d %X");
         return ss.str();
     }
 
@@ -124,7 +128,7 @@ namespace poison { namespace utils {
         std::ostringstream stream;
         stream  << currentDateTime().c_str() << " [ " << LogLevel_str[int(priority)] << "] " << formatString(format, args...) << std::endl;
         
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__linux__)
         if(internal::appTag != ""){
             std::cout << internal::appTag << ": " << stream.str();
         }else{
